@@ -1,9 +1,12 @@
 package ivan.vatlin.study_centre.services;
 
+import ivan.vatlin.study_centre.entity.Course;
 import ivan.vatlin.study_centre.entity.Student;
 import ivan.vatlin.study_centre.repository.StudentsRepo;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public class StudentServiceImpl implements StudentService {
     private StudentsRepo studentsRepo;
@@ -29,7 +32,14 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public double averageMark(long studentId) {
-        return 0;
+        return studentsRepo.getStudents().stream()
+                .filter(student -> student.getId() == studentId)
+                .map(Student::getMarks)
+                .map(Map::values)
+                .flatMap(Collection::stream)
+                .filter(integer -> integer != 0)
+                .mapToInt(Integer::intValue)
+                .average().getAsDouble();
     }
 
     @Override

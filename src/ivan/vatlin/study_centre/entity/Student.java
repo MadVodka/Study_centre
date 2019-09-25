@@ -3,11 +3,10 @@ package ivan.vatlin.study_centre.entity;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class Student {
-    private long id;
+    private static long idIncrement = 0;
+    private final long id = idIncrement++;
     private String name;
     private Curriculum curriculum;
     private List<Integer> marks;
@@ -15,10 +14,6 @@ public class Student {
 
     public long getId() {
         return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
     }
 
     public String getName() {
@@ -52,6 +47,14 @@ public class Student {
 
     public void setStartStudyingDate(LocalDate startStudyingDate) {
         this.startStudyingDate = startStudyingDate;
+    }
+
+    @Override
+    public String toString() {
+        return "Student{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                '}';
     }
 
     @Override
