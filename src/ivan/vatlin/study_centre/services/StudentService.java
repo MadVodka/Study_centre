@@ -5,15 +5,13 @@ import ivan.vatlin.study_centre.entity.Student;
 import java.util.List;
 
 public interface StudentService {
-    void addStudents(List<Student> students);
-
     List<Student> getStudents(); // overload method with sorting argument
 
-    List<Student> getStudentsGetExpelled();
+    List<Student> getStudentsGetExpelled(long studentId);
 
-    int getDaysLeftToStudy();
+    int getDaysLeftToStudy(long studentId);
 
-    double averageMark();
+    double averageMark(long studentId);
 
-    boolean possibilityGetExpelled();
+    boolean possibilityGetExpelled(long studentId);
 }
