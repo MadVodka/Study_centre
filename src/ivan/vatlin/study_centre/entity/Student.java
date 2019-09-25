@@ -5,7 +5,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class Student {
-    private long id;
+    private static long idIncrement = 0;
+    private final long id = idIncrement++;
     private String name;
     private Curriculum curriculum;
     private Map<Course, Integer> marks;
@@ -13,10 +14,6 @@ public class Student {
 
     public long getId() {
         return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
     }
 
     public String getName() {
@@ -34,7 +31,15 @@ public class Student {
     public void setCurriculum(Curriculum curriculum) {
         this.curriculum = curriculum;
         marks = curriculum.getCourses().stream()
-                .collect(Collectors.toMap(course -> course, null));
+                .collect(Collectors.toMap(course -> course, course -> 0));
+    }
+
+    public Map<Course, Integer> getMarks() {
+        return marks;
+    }
+
+    public void setMark(Course course, Integer mark) {
+        marks.put(course, mark);
     }
 
     public LocalDate getStartStudyingDate() {
@@ -43,6 +48,14 @@ public class Student {
 
     public void setStartStudyingDate(LocalDate startStudyingDate) {
         this.startStudyingDate = startStudyingDate;
+    }
+
+    @Override
+    public String toString() {
+        return "Student{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                '}';
     }
 
     @Override
