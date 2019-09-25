@@ -4,10 +4,10 @@ import ivan.vatlin.study_centre.entity.Student;
 
 import java.util.List;
 
-public class StudyCentre {
+public class StudentsRepo {
     private List<Student> students;
 
-    public StudyCentre(List<Student> students) {
+    public StudentsRepo(List<Student> students) {
         this.students = students;
     }
 
