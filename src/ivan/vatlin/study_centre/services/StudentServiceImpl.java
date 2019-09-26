@@ -9,10 +9,6 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class StudentServiceImpl implements StudentService {
     private StudentsRepo studentsRepo;
@@ -27,24 +23,23 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
+    public Student getStudent(long id) throws StudentNotFoundException {
+        return studentsRepo.getStudents().stream()
+                .filter(studentSearch -> studentSearch.getId() == id)
+                .findFirst()
+                .orElseThrow(() -> new StudentNotFoundException("student with id " + id + " not found"));
+    }
+
+    @Override
     public List<Student> getStudentsGetExpelled(long studentId) {
         return null;
     }
 
-    /**
-     *
-     * @param studentId
-     * @return if a student is still studying amount of hours left to study otherwise negative number
-     * @throws Exception
-     */
     @Override
-    public int hoursLeftToStudy(long studentId) throws Exception {
+    public int hoursLeftToStudy(long studentId) throws StudentNotFoundException {
         int hoursToStudyPerDay = 8;
 
-        Student student = studentsRepo.getStudents().stream()
-                .filter(studentSearch -> studentSearch.getId() == studentId)
-                .findFirst()
-                .orElseThrow(() -> new StudentNotFoundException("student with id " + studentId + " not found"));
+        Student student = getStudent(studentId);
 
         int overallHours = student.getCurriculum().getCourses().stream()
                 .mapToInt(Course::getHours)
@@ -56,13 +51,10 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public double averageMark(long studentId) {
-        return studentsRepo.getStudents().stream()
-                .filter(student -> student.getId() == studentId)
-                .map(Student::getMarks)
-                .map(Map::values)
-                .flatMap(Collection::stream)
-                .filter(integer -> integer != 0)
+    public double averageMark(long studentId) throws StudentNotFoundException {
+        Student student = getStudent(studentId);
+
+        return student.getMarks().stream()
                 .mapToInt(Integer::intValue)
                 .average().getAsDouble();
     }

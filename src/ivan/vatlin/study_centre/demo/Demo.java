@@ -32,10 +32,10 @@ public class Demo {
         student.setName("Ivan");
         student.setStartStudyingDate(LocalDate.of(2019, 9, 22));
         student.setCurriculum(curriculum);
-        student.setMark(course, 3);
-        student.setMark(course1, 3);
-        student.setMark(course2, 4);
-        student.setMark(course3, 4);
+        student.putMark(3);
+        student.putMark(3);
+        student.putMark(4);
+        student.putMark(4);
 
         List<Student> students = new ArrayList<>();
         students.add(student);
@@ -43,8 +43,8 @@ public class Demo {
         StudentsRepo studentsRepo = new StudentsRepo(students);
         StudentService studentService = new StudentServiceImpl(studentsRepo);
 
-        System.out.println("Average mark of " + student + " is " + studentService.averageMark(0));
         try {
+            System.out.println("Average mark of " + student + " is " + studentService.averageMark(0));
             System.out.println("Hours left to study is " + studentService.hoursLeftToStudy(0));
         } catch (StudentNotFoundException e) {
             e.printStackTrace();

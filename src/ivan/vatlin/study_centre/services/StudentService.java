@@ -8,11 +8,13 @@ import java.util.List;
 public interface StudentService {
     List<Student> getStudents(); // overload method with sorting argument
 
+    Student getStudent(long id) throws StudentNotFoundException;
+
     List<Student> getStudentsGetExpelled(long studentId);
 
     int hoursLeftToStudy(long studentId) throws StudentNotFoundException;
 
-    double averageMark(long studentId);
+    double averageMark(long studentId) throws StudentNotFoundException;
 
     boolean possibilityGetExpelled(long studentId);
 }
