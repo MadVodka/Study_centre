@@ -39,7 +39,6 @@ public class Student {
 
     public boolean putMark(Integer mark) {
         return marks.add(mark);
-        marks.put(course, mark);
     }
 
     public LocalDate getStartStudyingDate() {

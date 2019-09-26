@@ -46,6 +46,7 @@ public class Demo {
         try {
             System.out.println("Average mark of " + student + " is " + studentService.averageMark(0));
             System.out.println("Hours left to study is " + studentService.hoursLeftToStudy(0));
+            System.out.println(studentService.possibilityGetExpelled(0));
         } catch (StudentNotFoundException e) {
             e.printStackTrace();
         }

@@ -1,17 +1,20 @@
 package ivan.vatlin.study_centre.services;
 
 import ivan.vatlin.study_centre.entity.Course;
+import ivan.vatlin.study_centre.entity.Curriculum;
 import ivan.vatlin.study_centre.entity.Student;
 import ivan.vatlin.study_centre.exceptions.StudentNotFoundException;
 import ivan.vatlin.study_centre.repository.StudentsRepo;
 
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.Collection;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class StudentServiceImpl implements StudentService {
     private StudentsRepo studentsRepo;
+    private CurriculumService curriculumService = new CurriculumServiceImpl();
 
     public StudentServiceImpl(StudentsRepo studentsRepo) {
         this.studentsRepo = studentsRepo;
@@ -56,11 +59,26 @@ public class StudentServiceImpl implements StudentService {
 
         return student.getMarks().stream()
                 .mapToInt(Integer::intValue)
-                .average().getAsDouble();
+                .average()
+                .getAsDouble();
     }
 
     @Override
-    public boolean possibilityGetExpelled(long studentId) {
+    public boolean possibilityGetExpelled(long studentId) throws StudentNotFoundException {
+        Logger logger = Logger.getGlobal();
+
+        Student student = getStudent(studentId);
+        Curriculum curriculum = student.getCurriculum();
+
+        int amountOfMarks = curriculumService.amountOfMarks(curriculum);
+        logger.log(Level.INFO, "amount of marks is " + amountOfMarks);
+
+        int sumOfExistingMarks = student.getMarks().stream()
+                .mapToInt(Integer::intValue)
+                .sum();
+
+        int amountExistingMarks = student.getMarks().size();
+
         return false;
     }
 }

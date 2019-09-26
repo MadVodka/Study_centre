@@ -16,5 +16,5 @@ public interface StudentService {
 
     double averageMark(long studentId) throws StudentNotFoundException;
 
-    boolean possibilityGetExpelled(long studentId);
+    boolean possibilityGetExpelled(long studentId) throws StudentNotFoundException;
 }

@@ -3,8 +3,8 @@ package ivan.vatlin.study_centre.entity;
 import java.util.Set;
 
 public class Curriculum {
-    private String name;
-    private Set<Course> courses;
+    private final String name;
+    private final Set<Course> courses;
 
     public Curriculum(String name, Set<Course> courses) {
         this.name = name;
