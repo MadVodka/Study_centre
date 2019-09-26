@@ -1,6 +1,8 @@
 package ivan.vatlin.study_centre.entity;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -8,7 +10,7 @@ public class Student {
     private long id;
     private String name;
     private Curriculum curriculum;
-    private Map<Course, Integer> marks;
+    private List<Integer> marks;
     private LocalDate startStudyingDate;
 
     public long getId() {
@@ -33,8 +35,15 @@ public class Student {
 
     public void setCurriculum(Curriculum curriculum) {
         this.curriculum = curriculum;
-        marks = curriculum.getCourses().stream()
-                .collect(Collectors.toMap(course -> course, null));
+        marks = new ArrayList<>();
+    }
+
+    public List<Integer> getMarks() {
+        return marks;
+    }
+
+    public boolean putMark(Integer mark) {
+        return marks.add(mark);
     }
 
     public LocalDate getStartStudyingDate() {
