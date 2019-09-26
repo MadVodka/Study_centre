@@ -3,10 +3,12 @@ package ivan.vatlin.study_centre.demo;
 import ivan.vatlin.study_centre.entity.Course;
 import ivan.vatlin.study_centre.entity.Curriculum;
 import ivan.vatlin.study_centre.entity.Student;
+import ivan.vatlin.study_centre.exceptions.StudentNotFoundException;
 import ivan.vatlin.study_centre.repository.StudentsRepo;
 import ivan.vatlin.study_centre.services.StudentService;
 import ivan.vatlin.study_centre.services.StudentServiceImpl;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -28,6 +30,7 @@ public class Demo {
 
         Student student = new Student();
         student.setName("Ivan");
+        student.setStartStudyingDate(LocalDate.of(2019, 9, 22));
         student.setCurriculum(curriculum);
         student.setMark(course, 3);
         student.setMark(course1, 3);
@@ -41,5 +44,10 @@ public class Demo {
         StudentService studentService = new StudentServiceImpl(studentsRepo);
 
         System.out.println("Average mark of " + student + " is " + studentService.averageMark(0));
+        try {
+            System.out.println("Hours left to study is " + studentService.hoursLeftToStudy(0));
+        } catch (StudentNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 }
