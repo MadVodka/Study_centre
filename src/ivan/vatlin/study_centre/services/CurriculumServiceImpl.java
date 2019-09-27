@@ -5,7 +5,7 @@ import ivan.vatlin.study_centre.entity.Curriculum;
 
 public class CurriculumServiceImpl implements CurriculumService {
     @Override
-    public int amountOfMarks(Curriculum curriculum) {
+    public int quantityMarks(Curriculum curriculum) {
         int overallHours = curriculum.getCourses().stream()
                 .mapToInt(Course::getHours)
                 .sum();

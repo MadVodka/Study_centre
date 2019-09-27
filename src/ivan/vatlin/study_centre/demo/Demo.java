@@ -3,7 +3,6 @@ package ivan.vatlin.study_centre.demo;
 import ivan.vatlin.study_centre.entity.Course;
 import ivan.vatlin.study_centre.entity.Curriculum;
 import ivan.vatlin.study_centre.entity.Student;
-import ivan.vatlin.study_centre.exceptions.StudentNotFoundException;
 import ivan.vatlin.study_centre.repository.StudentsRepo;
 import ivan.vatlin.study_centre.services.StudentService;
 import ivan.vatlin.study_centre.services.StudentServiceImpl;
@@ -43,12 +42,16 @@ public class Demo {
         StudentsRepo studentsRepo = new StudentsRepo(students);
         StudentService studentService = new StudentServiceImpl(studentsRepo);
 
-        try {
-            System.out.println("Average mark of " + student + " is " + studentService.averageMark(0));
-            System.out.println("Hours left to study is " + studentService.hoursLeftToStudy(0));
-            System.out.println(studentService.possibilityGetExpelled(0));
-        } catch (StudentNotFoundException e) {
-            e.printStackTrace();
+        System.out.println("Average mark of " + student + " is " + studentService.averageMark(student));
+        System.out.println("Hours left to study is " + studentService.hoursLeftToStudy(student));
+
+        int possibilityExpelled = studentService.possibilityGetExpelled(student);
+        if (possibilityExpelled == 1) {
+            System.out.println("Keep it up! You are good!");
+        } else if (possibilityExpelled == 0) {
+            System.out.println("You have to do better! Try your best!");
+        } else {
+            System.out.println("You get expelled. I'm sorry");
         }
     }
 }

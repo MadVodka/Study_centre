@@ -10,11 +10,11 @@ public interface StudentService {
 
     Student getStudent(long id) throws StudentNotFoundException;
 
-    List<Student> getStudentsGetExpelled(long studentId);
+    List<Student> getStudentsGetExpelled();
 
-    int hoursLeftToStudy(long studentId) throws StudentNotFoundException;
+    int hoursLeftToStudy(Student student);
 
-    double averageMark(long studentId) throws StudentNotFoundException;
+    double averageMark(Student student);
 
-    boolean possibilityGetExpelled(long studentId) throws StudentNotFoundException;
+    int possibilityGetExpelled(Student student);
 }

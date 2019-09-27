@@ -9,8 +9,7 @@ import ivan.vatlin.study_centre.repository.StudentsRepo;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Set;
 
 public class StudentServiceImpl implements StudentService {
     private StudentsRepo studentsRepo;
@@ -34,51 +33,60 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public List<Student> getStudentsGetExpelled(long studentId) {
+    public List<Student> getStudentsGetExpelled() {
         return null;
     }
 
     @Override
-    public int hoursLeftToStudy(long studentId) throws StudentNotFoundException {
+    public int hoursLeftToStudy(Student student) {
         int hoursToStudyPerDay = 8;
 
-        Student student = getStudent(studentId);
-
-        int overallHours = student.getCurriculum().getCourses().stream()
+        Set<Course> courses = student.getCurriculum().getCourses();
+        int overallHours = courses.stream()
                 .mapToInt(Course::getHours)
                 .sum();
 
-        int daysAlreadyStudiedInclusive = Period.between(student.getStartStudyingDate(), LocalDate.now()).getDays() + 1;
+        Period studiedPeriod = Period.between(student.getStartStudyingDate(), LocalDate.now());
+        int daysAlreadyStudiedInclusive = studiedPeriod.getDays() + 1;
 
         return overallHours - hoursToStudyPerDay * daysAlreadyStudiedInclusive;
     }
 
     @Override
-    public double averageMark(long studentId) throws StudentNotFoundException {
-        Student student = getStudent(studentId);
-
+    public double averageMark(Student student) {
         return student.getMarks().stream()
                 .mapToInt(Integer::intValue)
                 .average()
-                .getAsDouble();
+                .orElse(0);
     }
 
+    /**
+     * @param student
+     * @return 1 if student is successful so far, 0 if he doesn't have passing average mark but still can correct it,
+     * -1 if he gets expelled
+     */
     @Override
-    public boolean possibilityGetExpelled(long studentId) throws StudentNotFoundException {
-        Logger logger = Logger.getGlobal();
+    public int possibilityGetExpelled(Student student) {
+        double passingMark = 4.5;
 
-        Student student = getStudent(studentId);
-        Curriculum curriculum = student.getCurriculum();
+        if (averageMark(student) >= passingMark) {
+            return 1;
+        } else {
+            Curriculum curriculum = student.getCurriculum();
 
-        int amountOfMarks = curriculumService.amountOfMarks(curriculum);
-        logger.log(Level.INFO, "amount of marks is " + amountOfMarks);
+            int quantityAllMarks = curriculumService.quantityMarks(curriculum);
+            int quantityExistingMarks = student.getMarks().size();
+            int sumExistingMarks = student.getMarks().stream()
+                    .mapToInt(Integer::intValue)
+                    .sum();
 
-        int sumOfExistingMarks = student.getMarks().stream()
-                .mapToInt(Integer::intValue)
-                .sum();
+            double potentialAverageMark = (sumExistingMarks + (quantityAllMarks - quantityExistingMarks) * 5) /
+                    (double) quantityAllMarks;
 
-        int amountExistingMarks = student.getMarks().size();
-
-        return false;
+            if (potentialAverageMark >= passingMark) {
+                return 0;
+            }
+        }
+        return -1;
     }
 }
