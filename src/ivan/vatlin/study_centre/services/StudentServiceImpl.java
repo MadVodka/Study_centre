@@ -3,20 +3,20 @@ package ivan.vatlin.study_centre.services;
 import ivan.vatlin.study_centre.entity.Course;
 import ivan.vatlin.study_centre.entity.Curriculum;
 import ivan.vatlin.study_centre.entity.Student;
-import ivan.vatlin.study_centre.exceptions.StudentNotFoundException;
 import ivan.vatlin.study_centre.repository.StudentsRepo;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class StudentServiceImpl implements StudentService {
     private StudentsRepo studentsRepo;
-    private CurriculumService curriculumService = new CurriculumServiceImpl();
 
-    public StudentServiceImpl(StudentsRepo studentsRepo) {
-        this.studentsRepo = studentsRepo;
+    public StudentServiceImpl() {
+        studentsRepo = StudentsRepo.getInstance();
     }
 
     @Override
@@ -25,16 +25,31 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public Student getStudent(long id) throws StudentNotFoundException {
-        return studentsRepo.getStudents().stream()
-                .filter(studentSearch -> studentSearch.getId() == id)
-                .findFirst()
-                .orElseThrow(() -> new StudentNotFoundException("student with id " + id + " not found"));
+    public List<Student> getStudentsSortByAvgMark() {
+        return getStudents().stream()
+                .sorted((o1, o2) -> {
+                    double result = averageMark(o1)-averageMark(o2);
+                    if (result>0) {
+                        return 1;
+                    } else if (result==0) {
+                        return 0;
+                    } else {
+                        return -1;
+                    }
+                })
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<Student> getStudentsGetExpelled() {
-        return null;
+    public List<Student> getStudentsSortByHoursLeft() {
+        return getStudents().stream()
+                .sorted(Comparator.comparingInt(this::hoursLeftToStudy))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean addStudent(Student student) {
+        return studentsRepo.addStudent(student);
     }
 
     @Override
@@ -74,6 +89,7 @@ public class StudentServiceImpl implements StudentService {
         } else {
             Curriculum curriculum = student.getCurriculum();
 
+            CurriculumService curriculumService = new CurriculumServiceImpl();
             int quantityAllMarks = curriculumService.quantityMarks(curriculum);
             int quantityExistingMarks = student.getMarks().size();
             int sumExistingMarks = student.getMarks().stream()

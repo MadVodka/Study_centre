@@ -1,16 +1,17 @@
 package ivan.vatlin.study_centre.services;
 
 import ivan.vatlin.study_centre.entity.Student;
-import ivan.vatlin.study_centre.exceptions.StudentNotFoundException;
 
 import java.util.List;
 
 public interface StudentService {
-    List<Student> getStudents(); // overload method with sorting argument
+    List<Student> getStudents();
 
-    Student getStudent(long id) throws StudentNotFoundException;
+    List<Student> getStudentsSortByAvgMark();
 
-    List<Student> getStudentsGetExpelled();
+    List<Student> getStudentsSortByHoursLeft();
+
+    boolean addStudent(Student student);
 
     int hoursLeftToStudy(Student student);
 
