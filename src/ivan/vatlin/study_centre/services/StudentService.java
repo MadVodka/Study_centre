@@ -13,6 +13,8 @@ public interface StudentService {
 
     boolean addStudent(Student student);
 
+    int daysPassed(Student student);
+
     int hoursLeftToStudy(Student student);
 
     double averageMark(Student student);

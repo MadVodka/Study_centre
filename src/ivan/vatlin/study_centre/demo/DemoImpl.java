@@ -27,20 +27,40 @@ public class DemoImpl implements Demo {
         initializeCurriculum();
         initializeStudents();
 
-        List<Student> students = studentService.getStudentsSortByHoursLeft();
+        List<Student> students = studentService.getStudentsSortByAvgMark();
         for (Student student : students) {
-            System.out.println(student.getName()+":");
-            System.out.println("Hours left to study by curriculum " + student.getCurriculum().getName() + " - "
-                    + studentService.hoursLeftToStudy(student));
-            System.out.println("Average mark - " + studentService.averageMark(student));
+            System.out.println(student.getName() + ":");
+
+            int hoursLeftToStudy = studentService.hoursLeftToStudy(student);
+            if (hoursLeftToStudy < 0) {
+                System.out.println("Обучение по программе " + student.getCurriculum().getName() + " еще не началось.");
+                System.out.println("-------------------------");
+                continue;
+            } else if (hoursLeftToStudy == 0) {
+                System.out.println("Обучение по программе " + student.getCurriculum().getName() + " завершено.");
+            } else {
+                System.out.println("Остаток часов по программе " + student.getCurriculum().getName() + " - "
+                        + studentService.hoursLeftToStudy(student));
+            }
+
+            System.out.println("Средняя оценка - " + studentService.averageMark(student));
 
             int possibilityExpelled = studentService.possibilityGetExpelled(student);
             if (possibilityExpelled == 1) {
-                System.out.println("Keep it up! You are good!");
+                if (hoursLeftToStudy==0) {
+                    System.out.println("Обучение пройдено успешно! Вы проходите дальше!");
+                }
+                System.out.println("Продолжайте в том же духе!");
             } else if (possibilityExpelled == 0) {
-                System.out.println("You have to do better! Try your best!");
+                if (hoursLeftToStudy==0) {
+                    System.out.println("Проходной бал не пройден. Вы отчислены.");
+                }
+                System.out.println("Приложите больше усилий, чтобы набрать проходной балл.");
             } else {
-                System.out.println("You get expelled. I'm sorry");
+                if (hoursLeftToStudy==0) {
+                    System.out.println("Проходной бал не пройден. Вы отчислены.");
+                }
+                System.out.println("Вы отчислены.");
             }
 
             System.out.println("-------------------------");
@@ -61,7 +81,8 @@ public class DemoImpl implements Demo {
             Curriculum curriculum = curriculumService.getAnyCurriculum();
             student.setCurriculum(curriculum);
 
-            for (int j = 0; j < 5; j++) {
+            int quantityMarksToPut = studentService.daysPassed(student);
+            for (int j = 0; j < quantityMarksToPut; j++) {
                 int mark = markGenerator.generate();
                 student.putMark(mark);
             }

@@ -6,6 +6,7 @@ import ivan.vatlin.study_centre.repository.CurriculaRepo;
 
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 public class CurriculumServiceImpl implements CurriculumService {
     private CurriculaRepo curriculaRepo;
@@ -35,12 +36,21 @@ public class CurriculumServiceImpl implements CurriculumService {
     }
 
     @Override
-    public int quantityMarks(Curriculum curriculum) {
-        int overallHours = curriculum.getCourses().stream()
+    public int overallHours(Curriculum curriculum) {
+        Set<Course> courses = curriculum.getCourses();
+        return courses.stream()
                 .mapToInt(Course::getHours)
                 .sum();
+    }
 
-        double days = overallHours / 8.0;
+    @Override
+    public int overallMarks(Curriculum curriculum) {
+        return overallDays(curriculum);
+    }
+
+    @Override
+    public int overallDays(Curriculum curriculum) {
+        double days = overallHours(curriculum) / 8.0;
         return (int) Math.ceil(days);
     }
 }

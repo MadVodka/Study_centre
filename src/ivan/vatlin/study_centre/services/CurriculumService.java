@@ -11,5 +11,9 @@ public interface CurriculumService {
 
     boolean addCurriculum(Curriculum curriculum);
 
-    int quantityMarks(Curriculum curriculum);
+    int overallHours(Curriculum curriculum);
+
+    int overallMarks(Curriculum curriculum);
+
+    int overallDays(Curriculum curriculum);
 }
