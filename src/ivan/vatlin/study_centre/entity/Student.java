@@ -12,6 +12,11 @@ public class Student {
     private List<Integer> marks;
     private LocalDate startStudyingDate;
 
+    public Student(String name) {
+        this.name = name;
+        marks = new ArrayList<>();
+    }
+
     public long getId() {
         return id;
     }
@@ -30,7 +35,6 @@ public class Student {
 
     public void setCurriculum(Curriculum curriculum) {
         this.curriculum = curriculum;
-        marks = new ArrayList<>();
     }
 
     public List<Integer> getMarks() {
