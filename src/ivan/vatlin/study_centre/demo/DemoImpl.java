@@ -1,17 +1,11 @@
 package ivan.vatlin.study_centre.demo;
 
-import ivan.vatlin.study_centre.data.StudentData;
-import ivan.vatlin.study_centre.entity.Course;
 import ivan.vatlin.study_centre.entity.Curriculum;
 import ivan.vatlin.study_centre.entity.Student;
-import ivan.vatlin.study_centre.generators.MarkGenerator;
 import ivan.vatlin.study_centre.services.CurriculumService;
 import ivan.vatlin.study_centre.services.StudentService;
 
-import java.time.LocalDate;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 public class DemoImpl implements Demo {
     private StudentService studentService;
@@ -24,132 +18,79 @@ public class DemoImpl implements Demo {
 
     @Override
     public void run() {
-        initializeCurriculum();
-        initializeStudents();
+        DemoDataInitializer.initialize();
 
-        List<Student> students = studentService.getStudentsSortByAvgMark();
+        List<Curriculum> curricula = curriculumService.getCurricula();
+        System.out.println(curricula);
+        printAsteriskDelimiter();
+
+        List<Student> students = studentService.getStudents();
+        printStudents(students);
+
+        System.out.println("Студенты отсортированные по оставшемуся количеству часов");
+        List<Student> studentsSortByHoursLeft = studentService.getStudentsSortByHoursLeft();
+        printStudents(studentsSortByHoursLeft);
+
+        System.out.println("Студенты отсортированные по среднему баллу");
+        List<Student> studentsSortByAvgMark = studentService.getStudentsSortByAvgMark();
+        printStudents(studentsSortByAvgMark);
+
+        System.out.println("Студенты, которые еще возможно пройдут дальше");
+        List<Student> studentsProbablySuccessful = studentService.getStudentsProbablySuccessful();
+        printStudents(studentsProbablySuccessful);
+    }
+
+    private void printStudents(List<Student> students) {
+        System.out.println();
         for (Student student : students) {
             System.out.println(student.getName() + ":");
+            System.out.println(createMessageOnLeftHours(student));
 
             int hoursLeftToStudy = studentService.hoursLeftToStudy(student);
-            if (hoursLeftToStudy < 0) {
-                System.out.println("Обучение по программе " + student.getCurriculum().getName() + " еще не началось.");
-                System.out.println("-------------------------");
-                continue;
-            } else if (hoursLeftToStudy == 0) {
-                System.out.println("Обучение по программе " + student.getCurriculum().getName() + " завершено.");
-            } else {
-                System.out.println("Остаток часов по программе " + student.getCurriculum().getName() + " - "
-                        + studentService.hoursLeftToStudy(student));
+            if (hoursLeftToStudy >= 0) {
+                System.out.println("Оценки - " + student.getMarks());
+                System.out.printf("Средняя оценка - %.2f%n", studentService.averageMark(student));
+                System.out.println(createMessageOnPossibilityGetExpelled(student));
             }
+            printDashDelimiter();
+        }
+        printAsteriskDelimiter();
+    }
 
-            System.out.println("Средняя оценка - " + studentService.averageMark(student));
+    private String createMessageOnLeftHours(Student student) {
+        int hoursLeftToStudy = studentService.hoursLeftToStudy(student);
+        if (hoursLeftToStudy < 0) {
+            return "Обучение по программе " + student.getCurriculum().getName() + " еще не началось.";
+        } else if (hoursLeftToStudy == 0) {
+            return "Обучение по программе " + student.getCurriculum().getName() + " завершено.";
+        }
+        return "Остаток часов по программе " + student.getCurriculum().getName() + " - " + hoursLeftToStudy;
+    }
 
-            int possibilityExpelled = studentService.possibilityGetExpelled(student);
+    private String createMessageOnPossibilityGetExpelled(Student student) {
+        int hoursLeftToStudy = studentService.hoursLeftToStudy(student);
+        int possibilityExpelled = studentService.possibilityGetExpelled(student);
+
+        if (hoursLeftToStudy == 0) {
             if (possibilityExpelled == 1) {
-                if (hoursLeftToStudy==0) {
-                    System.out.println("Обучение пройдено успешно! Вы проходите дальше!");
-                }
-                System.out.println("Продолжайте в том же духе!");
-            } else if (possibilityExpelled == 0) {
-                if (hoursLeftToStudy==0) {
-                    System.out.println("Проходной бал не пройден. Вы отчислены.");
-                }
-                System.out.println("Приложите больше усилий, чтобы набрать проходной балл.");
-            } else {
-                if (hoursLeftToStudy==0) {
-                    System.out.println("Проходной бал не пройден. Вы отчислены.");
-                }
-                System.out.println("Вы отчислены.");
+                return "Обучение пройдено успешно! Вы проходите дальше!";
             }
-
-            System.out.println("-------------------------");
+            return "Проходной бал не пройден. Вы отчислены.";
         }
-    }
 
-    private void initializeStudents() {
-        String[] names = StudentData.NAMES;
-        String[] dates = StudentData.DATES;
-        MarkGenerator markGenerator = new MarkGenerator(5);
-
-        for (int i = 0; i < names.length; i++) {
-            Student student = new Student(names[i]);
-
-            LocalDate startingDate = LocalDate.parse(dates[i]);
-            student.setStartStudyingDate(startingDate);
-
-            Curriculum curriculum = curriculumService.getAnyCurriculum();
-            student.setCurriculum(curriculum);
-
-            int quantityMarksToPut = studentService.daysPassed(student);
-            for (int j = 0; j < quantityMarksToPut; j++) {
-                int mark = markGenerator.generate();
-                student.putMark(mark);
-            }
-
-            studentService.addStudent(student);
+        if (possibilityExpelled == 1) {
+            return "Продолжайте в том же духе!";
+        } else if (possibilityExpelled == 0) {
+            return "Приложите больше усилий, чтобы набрать проходной балл.";
         }
+        return "Вы отчислены.";
     }
 
-    private void initializeCurriculum() {
-        initializeDatabaseCurriculum();
-        initializeJavaFundamentalsCurriculum();
-        initializeFrontendCurriculum();
+    private void printDashDelimiter() {
+        System.out.println("-------------------------");
     }
 
-    private void initializeDatabaseCurriculum() {
-        Course course = new Course("Tables design", 20);
-        Course course1 = new Course("SQL", 6);
-        Course course2 = new Course("JDBC", 50);
-        Course course3 = new Course("Spring JDBC", 30);
-
-        Set<Course> databaseCourses = new LinkedHashSet<>();
-        databaseCourses.add(course);
-        databaseCourses.add(course1);
-        databaseCourses.add(course2);
-        databaseCourses.add(course3);
-
-        Curriculum databaseInJavaCurriculum = new Curriculum("Database in Java", databaseCourses);
-        curriculumService.addCurriculum(databaseInJavaCurriculum);
-    }
-
-    private void initializeJavaFundamentalsCurriculum() {
-        Course course = new Course("Variables and data types", 8);
-        Course course1 = new Course("Object oriented programming", 14);
-        Course course2 = new Course("Polymorphism", 22);
-        Course course3 = new Course("Data handling", 15);
-        Course course4 = new Course("Collections", 48);
-        Course course5 = new Course("Stream API", 48);
-
-        Set<Course> databaseCourses = new LinkedHashSet<>();
-        databaseCourses.add(course);
-        databaseCourses.add(course1);
-        databaseCourses.add(course2);
-        databaseCourses.add(course3);
-        databaseCourses.add(course4);
-        databaseCourses.add(course5);
-
-        Curriculum javaFundamentalsCurriculum = new Curriculum("Java Fundamentals", databaseCourses);
-        curriculumService.addCurriculum(javaFundamentalsCurriculum);
-    }
-
-    private void initializeFrontendCurriculum() {
-        Course course = new Course("HTML", 20);
-        Course course1 = new Course("CSS", 20);
-        Course course2 = new Course("XML", 16);
-        Course course3 = new Course("Javascript", 60);
-        Course course4 = new Course("Popular JS frameworks", 8);
-        Course course5 = new Course("Angular", 48);
-
-        Set<Course> databaseCourses = new LinkedHashSet<>();
-        databaseCourses.add(course);
-        databaseCourses.add(course1);
-        databaseCourses.add(course2);
-        databaseCourses.add(course3);
-        databaseCourses.add(course4);
-        databaseCourses.add(course5);
-
-        Curriculum frontendCurriculum = new Curriculum("Frontend", databaseCourses);
-        curriculumService.addCurriculum(frontendCurriculum);
+    private void printAsteriskDelimiter() {
+        System.out.println("****************************");
     }
 }

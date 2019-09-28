@@ -10,6 +10,7 @@ import java.util.Set;
 
 public class CurriculumServiceImpl implements CurriculumService {
     private CurriculaRepo curriculaRepo;
+    private Random random = new Random();
 
     public CurriculumServiceImpl() {
         curriculaRepo = CurriculaRepo.getInstance();
@@ -22,11 +23,8 @@ public class CurriculumServiceImpl implements CurriculumService {
 
     @Override
     public Curriculum getAnyCurriculum() {
-        int size= curriculaRepo.getCurricula().size();
-
-        Random random = new Random();
+        int size = curriculaRepo.getCurricula().size();
         int randomPosition = random.nextInt(size);
-
         return curriculaRepo.getCurricula().get(randomPosition);
     }
 

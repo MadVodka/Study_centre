@@ -11,6 +11,8 @@ public interface StudentService {
 
     List<Student> getStudentsSortByHoursLeft();
 
+    List<Student> getStudentsProbablySuccessful();
+
     boolean addStudent(Student student);
 
     int daysPassed(Student student);

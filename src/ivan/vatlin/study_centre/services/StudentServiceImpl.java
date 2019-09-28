@@ -47,6 +47,13 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
+    public List<Student> getStudentsProbablySuccessful() {
+        return getStudents().stream()
+                .filter(student -> possibilityGetExpelled(student) == 0)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public boolean addStudent(Student student) {
         return studentsRepo.addStudent(student);
     }
@@ -66,7 +73,7 @@ public class StudentServiceImpl implements StudentService {
     }
 
     /**
-     * @param student
+     * @param student {@link Student} object
      * @return positive number is hours left to study, 0 if study is finished, -1 if study has not been started yet
      */
     @Override
@@ -98,7 +105,7 @@ public class StudentServiceImpl implements StudentService {
     }
 
     /**
-     * @param student
+     * @param student {@link Student} object
      * @return 1 if student is successful so far, 0 if he doesn't have passing average mark but still can correct it,
      * -1 if he gets expelled
      */
@@ -108,21 +115,21 @@ public class StudentServiceImpl implements StudentService {
 
         if (averageMark(student) >= passingMark) {
             return 1;
-        } else {
-            Curriculum curriculum = student.getCurriculum();
+        }
 
-            int quantityAllMarks = curriculumService.overallMarks(curriculum);
-            int quantityExistingMarks = student.getMarks().size();
-            int sumExistingMarks = student.getMarks().stream()
-                    .mapToInt(Integer::intValue)
-                    .sum();
+        Curriculum curriculum = student.getCurriculum();
 
-            double potentialAverageMark = (sumExistingMarks + (quantityAllMarks - quantityExistingMarks) * 5) /
-                    (double) quantityAllMarks;
+        int quantityAllMarks = curriculumService.overallMarks(curriculum);
+        int quantityExistingMarks = student.getMarks().size();
+        int sumExistingMarks = student.getMarks().stream()
+                .mapToInt(Integer::intValue)
+                .sum();
 
-            if (potentialAverageMark >= passingMark) {
-                return 0;
-            }
+        double potentialAverageMark = (sumExistingMarks + (quantityAllMarks - quantityExistingMarks) * 5) /
+                (double) quantityAllMarks;
+
+        if (potentialAverageMark >= passingMark) {
+            return 0;
         }
         return -1;
     }

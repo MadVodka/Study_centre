@@ -1,6 +1,9 @@
 package ivan.vatlin.study_centre.data;
 
-public class StudentData {
+public class StudentDataHolder {
+    private StudentDataHolder(){
+    }
+
     public static final String[] NAMES = {
             "Oleg", "Vladimir", "Raya", "Ulyana", "Mikhail", "Roman", "Ekaterina", "Irina", "Nikolay", "Fedor",
             "Nadezhda", "Elena"
