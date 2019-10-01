@@ -23,6 +23,7 @@ public class Curriculum {
     public String toString() {
         return "Curriculum{" +
                 "name='" + name + '\'' +
+                ", courses=" + courses +
                 '}';
     }
 
