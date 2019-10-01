@@ -15,11 +15,9 @@ public interface StudentService {
 
     boolean addStudent(Student student);
 
-    int daysPassed(Student student);
+    int getHoursLeftToStudy(Student student);
 
-    int hoursLeftToStudy(Student student);
+    double getAverageMark(Student student);
 
-    double averageMark(Student student);
-
-    int possibilityGetExpelled(Student student);
+    int getPossibilityGetExpelled(Student student);
 }

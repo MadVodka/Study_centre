@@ -10,6 +10,8 @@ import java.util.List;
 public class DemoImpl implements Demo {
     private StudentService studentService;
     private CurriculumService curriculumService;
+    private static final String DASH_DELIMITER = "-------------------------";
+    private static final String ASTERISK_DELIMITER = "****************************";
 
     public DemoImpl(StudentService studentService, CurriculumService curriculumService) {
         this.studentService = studentService;
@@ -18,11 +20,9 @@ public class DemoImpl implements Demo {
 
     @Override
     public void run() {
-        DemoDataInitializer.initialize();
-
         List<Curriculum> curricula = curriculumService.getCurricula();
         System.out.println(curricula);
-        printAsteriskDelimiter();
+        System.out.println(ASTERISK_DELIMITER);
 
         List<Student> students = studentService.getStudents();
         printStudents(students);
@@ -46,19 +46,19 @@ public class DemoImpl implements Demo {
             System.out.println(student.getName() + ":");
             System.out.println(createMessageOnLeftHours(student));
 
-            int hoursLeftToStudy = studentService.hoursLeftToStudy(student);
+            int hoursLeftToStudy = studentService.getHoursLeftToStudy(student);
             if (hoursLeftToStudy >= 0) {
                 System.out.println("Оценки - " + student.getMarks());
-                System.out.printf("Средняя оценка - %.2f%n", studentService.averageMark(student));
+                System.out.printf("Средняя оценка - %.2f%n", studentService.getAverageMark(student));
                 System.out.println(createMessageOnPossibilityGetExpelled(student));
             }
-            printDashDelimiter();
+            System.out.println(DASH_DELIMITER);
         }
-        printAsteriskDelimiter();
+        System.out.println(ASTERISK_DELIMITER);
     }
 
     private String createMessageOnLeftHours(Student student) {
-        int hoursLeftToStudy = studentService.hoursLeftToStudy(student);
+        int hoursLeftToStudy = studentService.getHoursLeftToStudy(student);
         if (hoursLeftToStudy < 0) {
             return "Обучение по программе " + student.getCurriculum().getName() + " еще не началось.";
         } else if (hoursLeftToStudy == 0) {
@@ -68,8 +68,8 @@ public class DemoImpl implements Demo {
     }
 
     private String createMessageOnPossibilityGetExpelled(Student student) {
-        int hoursLeftToStudy = studentService.hoursLeftToStudy(student);
-        int possibilityExpelled = studentService.possibilityGetExpelled(student);
+        int hoursLeftToStudy = studentService.getHoursLeftToStudy(student);
+        int possibilityExpelled = studentService.getPossibilityGetExpelled(student);
 
         if (hoursLeftToStudy == 0) {
             if (possibilityExpelled == 1) {
@@ -84,13 +84,5 @@ public class DemoImpl implements Demo {
             return "Приложите больше усилий, чтобы набрать проходной балл.";
         }
         return "Вы отчислены.";
-    }
-
-    private void printDashDelimiter() {
-        System.out.println("-------------------------");
-    }
-
-    private void printAsteriskDelimiter() {
-        System.out.println("****************************");
     }
 }

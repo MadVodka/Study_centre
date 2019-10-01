@@ -1,8 +1,8 @@
 package ivan.vatlin.study_centre.repository;
 
+import ivan.vatlin.study_centre.demo.DemoDataInitializer;
 import ivan.vatlin.study_centre.entity.Student;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class StudentsRepo {
@@ -17,7 +17,7 @@ public class StudentsRepo {
     }
 
     private StudentsRepo() {
-        students = new ArrayList<>();
+        students = DemoDataInitializer.getInitializedStudents();
     }
 
     public boolean addStudent(Student student) {

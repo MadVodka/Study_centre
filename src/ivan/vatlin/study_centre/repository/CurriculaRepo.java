@@ -1,8 +1,8 @@
 package ivan.vatlin.study_centre.repository;
 
+import ivan.vatlin.study_centre.demo.DemoDataInitializer;
 import ivan.vatlin.study_centre.entity.Curriculum;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class CurriculaRepo {
@@ -10,7 +10,7 @@ public class CurriculaRepo {
     private static CurriculaRepo curriculaRepo;
 
     private CurriculaRepo() {
-        curricula = new ArrayList<>();
+        curricula = DemoDataInitializer.getInitializedCurricula();
     }
 
     public static CurriculaRepo getInstance() {

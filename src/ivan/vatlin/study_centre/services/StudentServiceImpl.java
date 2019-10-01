@@ -26,30 +26,21 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public List<Student> getStudentsSortByAvgMark() {
         return getStudents().stream()
-                .sorted((o1, o2) -> {
-                    double result = averageMark(o1) - averageMark(o2);
-                    if (result > 0) {
-                        return 1;
-                    } else if (result == 0) {
-                        return 0;
-                    } else {
-                        return -1;
-                    }
-                })
+                .sorted(Comparator.comparingDouble(this::getAverageMark))
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<Student> getStudentsSortByHoursLeft() {
         return getStudents().stream()
-                .sorted(Comparator.comparingInt(this::hoursLeftToStudy))
+                .sorted(Comparator.comparingInt(this::getHoursLeftToStudy))
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<Student> getStudentsProbablySuccessful() {
         return getStudents().stream()
-                .filter(student -> possibilityGetExpelled(student) == 0)
+                .filter(student -> getPossibilityGetExpelled(student) == 0)
                 .collect(Collectors.toList());
     }
 
@@ -58,26 +49,12 @@ public class StudentServiceImpl implements StudentService {
         return studentsRepo.addStudent(student);
     }
 
-    @Override
-    public int daysPassed(Student student) {
-        Period studiedPeriod = Period.between(student.getStartStudyingDate(), LocalDate.now());
-        int daysAlreadyStudiedInclusive = studiedPeriod.getDays() + 1;
-        int daysToStudyOverall = curriculumService.overallDays(student.getCurriculum());
-
-        if (daysAlreadyStudiedInclusive < 0) {
-            return 0;
-        } else if (daysAlreadyStudiedInclusive > daysToStudyOverall) {
-            return daysToStudyOverall;
-        }
-        return daysAlreadyStudiedInclusive;
-    }
-
     /**
      * @param student {@link Student} object
      * @return positive number is hours left to study, 0 if study is finished, -1 if study has not been started yet
      */
     @Override
-    public int hoursLeftToStudy(Student student) {
+    public int getHoursLeftToStudy(Student student) {
         int hoursToStudyPerDay = 8;
 
         Period studiedPeriod = Period.between(student.getStartStudyingDate(), LocalDate.now());
@@ -87,17 +64,17 @@ public class StudentServiceImpl implements StudentService {
             return -1;
         }
 
-        int overallDays = curriculumService.overallDays(student.getCurriculum());
+        int overallDays = curriculumService.getTotalDays(student.getCurriculum());
         if (daysAlreadyStudiedInclusive >= overallDays) {
             return 0;
         }
 
-        int overallHours = curriculumService.overallHours(student.getCurriculum());
+        int overallHours = curriculumService.getTotalHours(student.getCurriculum());
         return overallHours - hoursToStudyPerDay * daysAlreadyStudiedInclusive;
     }
 
     @Override
-    public double averageMark(Student student) {
+    public double getAverageMark(Student student) {
         return student.getMarks().stream()
                 .mapToInt(Integer::intValue)
                 .average()
@@ -110,16 +87,16 @@ public class StudentServiceImpl implements StudentService {
      * -1 if he gets expelled
      */
     @Override
-    public int possibilityGetExpelled(Student student) {
+    public int getPossibilityGetExpelled(Student student) {
         double passingMark = 4.5;
 
-        if (averageMark(student) >= passingMark) {
+        if (getAverageMark(student) >= passingMark) {
             return 1;
         }
 
         Curriculum curriculum = student.getCurriculum();
 
-        int quantityAllMarks = curriculumService.overallMarks(curriculum);
+        int quantityAllMarks = curriculumService.getTotalMarks(curriculum);
         int quantityExistingMarks = student.getMarks().size();
         int sumExistingMarks = student.getMarks().stream()
                 .mapToInt(Integer::intValue)

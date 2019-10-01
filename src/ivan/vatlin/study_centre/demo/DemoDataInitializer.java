@@ -1,121 +1,87 @@
 package ivan.vatlin.study_centre.demo;
 
+import ivan.vatlin.study_centre.data.CurriculumDataHolder;
 import ivan.vatlin.study_centre.data.StudentDataHolder;
 import ivan.vatlin.study_centre.entity.Course;
 import ivan.vatlin.study_centre.entity.Curriculum;
 import ivan.vatlin.study_centre.entity.Student;
+import ivan.vatlin.study_centre.generators.DateGenerator;
 import ivan.vatlin.study_centre.generators.MarkGenerator;
 import ivan.vatlin.study_centre.services.CurriculumService;
 import ivan.vatlin.study_centre.services.CurriculumServiceImpl;
-import ivan.vatlin.study_centre.services.StudentService;
-import ivan.vatlin.study_centre.services.StudentServiceImpl;
 
 import java.time.LocalDate;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.LongStream;
 
-class DemoDataInitializer {
-    private static DemoDataInitializer demoDataInitializer;
-    private CurriculumService curriculumService;
-    private StudentService studentService;
-    private boolean isInitialized = false;
+public class DemoDataInitializer {
+    private static CurriculumService curriculumService = new CurriculumServiceImpl();
+    private static List<Student> students;
+    private static List<Curriculum> curricula;
 
     private DemoDataInitializer() {
-        curriculumService = new CurriculumServiceImpl();
-        studentService = new StudentServiceImpl();
     }
 
-    static void initialize() {
-        if (demoDataInitializer == null) {
-            demoDataInitializer = new DemoDataInitializer();
+    public static List<Student> getInitializedStudents() {
+        if (students == null) {
+            initializeStudents();
         }
-        if (!demoDataInitializer.isInitialized) {
-            demoDataInitializer.initializeCurriculum();
-            demoDataInitializer.initializeStudents();
-            demoDataInitializer.isInitialized = true;
-        }
+        return students;
     }
 
-    private void initializeStudents() {
-        String[] names = StudentDataHolder.NAMES;
-        String[] dates = StudentDataHolder.DATES;
+    private static void initializeStudents() {
+        students = new ArrayList<>();
+
+        List<String> names = StudentDataHolder.getNames();
+
+        LocalDate startLocalDate = LocalDate.of(2019, 6, 15);
+        LocalDate endLocalDate = LocalDate.of(2019, 10, 20);
+        DateGenerator dateGenerator = new DateGenerator(startLocalDate, endLocalDate);
+
         MarkGenerator markGenerator = new MarkGenerator(5);
 
-        for (int i = 0; i < names.length; i++) {
-            Student student = new Student(names[i]);
+        for (String name : names) {
+            Student student = new Student(name);
 
-            LocalDate startingDate = LocalDate.parse(dates[i]);
+            LocalDate startingDate = dateGenerator.generate();
             student.setStartStudyingDate(startingDate);
-
             Curriculum curriculum = curriculumService.getAnyCurriculum();
             student.setCurriculum(curriculum);
 
-            int quantityMarksToPut = studentService.daysPassed(student);
-            for (int j = 0; j < quantityMarksToPut; j++) {
+            long quantityMarksToPut = curriculumService.getDaysPassed(startingDate, curriculum);
+            LongStream.range(0, quantityMarksToPut).forEach(value -> {
                 int mark = markGenerator.generate();
                 student.putMark(mark);
-            }
+            });
 
-            studentService.addStudent(student);
+            students.add(student);
         }
     }
 
-    private void initializeCurriculum() {
-        curriculumService.addCurriculum(createDatabaseCurriculum());
-        curriculumService.addCurriculum(createJavaFundamentalsCurriculum());
-        curriculumService.addCurriculum(createFrontendCurriculum());
+    public static List<Curriculum> getInitializedCurricula() {
+        if (curricula == null) {
+            initializeCurricula();
+        }
+        return curricula;
     }
 
-    private Curriculum createDatabaseCurriculum() {
-        Course course = new Course("Tables design", 20);
-        Course course1 = new Course("SQL", 6);
-        Course course2 = new Course("JDBC", 50);
-        Course course3 = new Course("Spring JDBC", 30);
+    private static void initializeCurricula() {
+        curricula = new ArrayList<>();
 
-        Set<Course> databaseCourses = new LinkedHashSet<>();
-        databaseCourses.add(course);
-        databaseCourses.add(course1);
-        databaseCourses.add(course2);
-        databaseCourses.add(course3);
+        int minHours = 8;
+        int maxHours = 60;
+        Random random = new Random();
 
-        return new Curriculum("Database in Java", databaseCourses);
-    }
-
-    private Curriculum createJavaFundamentalsCurriculum() {
-        Course course = new Course("Variables and data types", 8);
-        Course course1 = new Course("Object oriented programming", 14);
-        Course course2 = new Course("Polymorphism", 22);
-        Course course3 = new Course("Data handling", 15);
-        Course course4 = new Course("Collections", 48);
-        Course course5 = new Course("Stream API", 48);
-
-        Set<Course> databaseCourses = new LinkedHashSet<>();
-        databaseCourses.add(course);
-        databaseCourses.add(course1);
-        databaseCourses.add(course2);
-        databaseCourses.add(course3);
-        databaseCourses.add(course4);
-        databaseCourses.add(course5);
-
-        return new Curriculum("Java Fundamentals", databaseCourses);
-    }
-
-    private Curriculum createFrontendCurriculum() {
-        Course course = new Course("HTML", 20);
-        Course course1 = new Course("CSS", 20);
-        Course course2 = new Course("XML", 16);
-        Course course3 = new Course("Javascript", 60);
-        Course course4 = new Course("Popular JS frameworks", 8);
-        Course course5 = new Course("Angular", 48);
-
-        Set<Course> databaseCourses = new LinkedHashSet<>();
-        databaseCourses.add(course);
-        databaseCourses.add(course1);
-        databaseCourses.add(course2);
-        databaseCourses.add(course3);
-        databaseCourses.add(course4);
-        databaseCourses.add(course5);
-
-        return new Curriculum("Frontend", databaseCourses);
+        Map<String, Set<String>> courses = CurriculumDataHolder.getCourses();
+        courses.forEach((title, coursesSet) -> {
+            Set<Course> curriculumCourses = new LinkedHashSet<>();
+            for (String courseName : coursesSet) {
+                int hours = random.nextInt(maxHours - minHours) + minHours;
+                Course course = new Course(courseName, hours);
+                curriculumCourses.add(course);
+            }
+            Curriculum curriculum = new Curriculum(title, curriculumCourses);
+            curricula.add(curriculum);
+        });
     }
 }

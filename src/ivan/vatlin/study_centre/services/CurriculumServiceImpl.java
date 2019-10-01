@@ -4,16 +4,20 @@ import ivan.vatlin.study_centre.entity.Course;
 import ivan.vatlin.study_centre.entity.Curriculum;
 import ivan.vatlin.study_centre.repository.CurriculaRepo;
 
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
 public class CurriculumServiceImpl implements CurriculumService {
     private CurriculaRepo curriculaRepo;
-    private Random random = new Random();
+    private Random random;
 
     public CurriculumServiceImpl() {
         curriculaRepo = CurriculaRepo.getInstance();
+        random = new Random();
     }
 
     @Override
@@ -34,7 +38,7 @@ public class CurriculumServiceImpl implements CurriculumService {
     }
 
     @Override
-    public int overallHours(Curriculum curriculum) {
+    public int getTotalHours(Curriculum curriculum) {
         Set<Course> courses = curriculum.getCourses();
         return courses.stream()
                 .mapToInt(Course::getHours)
@@ -42,13 +46,26 @@ public class CurriculumServiceImpl implements CurriculumService {
     }
 
     @Override
-    public int overallMarks(Curriculum curriculum) {
-        return overallDays(curriculum);
+    public int getTotalMarks(Curriculum curriculum) {
+        return getTotalDays(curriculum);
     }
 
     @Override
-    public int overallDays(Curriculum curriculum) {
-        double days = overallHours(curriculum) / 8.0;
+    public int getTotalDays(Curriculum curriculum) {
+        double days = getTotalHours(curriculum) / 8.0;
         return (int) Math.ceil(days);
+    }
+
+    @Override
+    public long getDaysPassed(LocalDate startingDate, Curriculum curriculum) {
+        long daysAlreadyStudiedInclusive = ChronoUnit.DAYS.between(startingDate, LocalDate.now()) + 1;
+        int daysToStudyOverall = getTotalDays(curriculum);
+
+        if (daysAlreadyStudiedInclusive < 0) {
+            return 0;
+        } else if (daysAlreadyStudiedInclusive > daysToStudyOverall) {
+            return daysToStudyOverall;
+        }
+        return daysAlreadyStudiedInclusive;
     }
 }
